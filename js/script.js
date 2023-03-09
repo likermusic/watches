@@ -123,32 +123,28 @@ const renderData = (data) => {
     } );
 }
 
+// 
+
+// Добавление в LS
 const addToLS = (item) => {
-    // if (localStorage.getItem('products')) {
-    //     dataFromLS = localStorage.getItem('products')
-    // }
 
-
-    let dataFromLS = localStorage.getItem('products'); // null || ''
-    console.log(dataFromLS);
+    let dataFromLS = localStorage.getItem('cart'); // null || ''
 
     let arr = []; 
     if (dataFromLS) {
         arr = JSON.parse(dataFromLS); 
     } 
     arr.push(item);
-    localStorage.setItem('products',JSON.stringify(arr));
+    localStorage.setItem('cart',JSON.stringify(arr));
 
-
-
-    
-
-    // console.log(jsonArr);
 }
 
 const rowData = getData();
 const productsData = transformData(rowData);
-renderData(productsData);
+
+localStorage.setItem('productsData',JSON.stringify(productsData));
+
+renderData(JSON.parse(localStorage.getItem('productsData')));
 
 
 document.querySelector('.product-top .product-one').addEventListener('click', (e) => {
