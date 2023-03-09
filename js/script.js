@@ -104,7 +104,7 @@ const renderData = (data) => {
                 <a href="single.html" class="mask"><img class="img-responsive zoom-img" src="images/${elem.img}" alt="" /></a>
                 <div class="product-bottom">
                     <h3>${elem.title}</h3>
-                    <h4><a class="item_add" href="#"><i></i></a> <span class=" item_price">$ ${elem.price}</span></h4>
+                    <h4><a class="item_add" href=""><i></i></a> <span class=" item_price">$ ${elem.price}</span></h4>
                 </div>   
                 
                 ${
@@ -123,14 +123,93 @@ const renderData = (data) => {
     } );
 }
 
+const addToLS = (item) => {
+    // if (localStorage.getItem('products')) {
+    //     dataFromLS = localStorage.getItem('products')
+    // }
+
+
+    let dataFromLS = localStorage.getItem('products'); // null || ''
+    console.log(dataFromLS);
+
+    let arr = []; 
+    if (dataFromLS) {
+        arr = JSON.parse(dataFromLS); 
+    } 
+    arr.push(item);
+    localStorage.setItem('products',JSON.stringify(arr));
+
+
+
+    
+
+    // console.log(jsonArr);
+}
 
 const rowData = getData();
 const productsData = transformData(rowData);
 renderData(productsData);
 
 
+document.querySelector('.product-top .product-one').addEventListener('click', (e) => {
+    e.preventDefault();
+    //console.log(e.target.tagName); // == <i></i>  
+    // if (e.target.classList.contains('icon')) {
+    //     console.log(e.target);
+    // } 
+    if (e.target.matches('.item_add i')) {
+        const id = e.target.closest('.product-left').dataset.id;
+        addToLS(id);
+    } 
+    // console.log(e.target);
+    // console.log(123);
+})
 
 
+
+
+// localStorage.setItem('number',5);
+// localStorage.setItem('text',"Hello world");
+// localStorage.setItem('bool',true);
+// localStorage.setItem('test','test');
+// localStorage.setItem('arr',JSON.stringify([1,2,3,4]));
+// localStorage.setItem('obj',JSON.stringify( {name:'John',age:32,status:true} ));
+
+// let jsonStr = localStorage.getItem('obj');
+
+// console.log(jsonStr);
+// let data = JSON.parse(jsonStr);
+// console.log(data);
+
+// localStorage.removeItem('number');
+// localStorage.clear();
+
+
+
+
+
+
+//JSON = JavaScript Object Notation => ''
+
+// let arr = [1,2,3,4];
+// let jsonArr = JSON.stringify(arr);
+// console.log(jsonArr);
+// let parsedArr = JSON.parse(jsonArr);
+// console.log(parsedArr);
+
+
+
+
+// let arr = [1,2,3];
+// let jsonArr = '[1,2,3]';
+
+
+// arr = ['hello',2,false];
+// jsonArr = '["hello",2,false]';
+
+// arr = ['hello',{name:'John',age:32, colors:['red','blue']}   ];
+// jsonArr = '["hello",   {"name":"John","age":32, "colors": ["red","blue"]}  ]';
+// console.log(JSON.parse(jsonArr));
 
 
 
