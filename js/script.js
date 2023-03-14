@@ -141,9 +141,7 @@ const addToLS = (item) => {
 
 const rowData = getData();
 const productsData = transformData(rowData);
-
 localStorage.setItem('productsData',JSON.stringify(productsData));
-
 renderData(JSON.parse(localStorage.getItem('productsData')));
 
 
