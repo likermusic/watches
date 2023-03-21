@@ -54,30 +54,16 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 			<div class="ckeckout-top">
 			<div class="cart-items">
 			 <h3>My Shopping Bag (<span id="cart-count">3</span>)</h3>
-				<script>$(document).ready(function(c) {
+				<!-- <script>$(document).ready(function(c) {
 					$('.close1').on('click', function(c){
 						$('.cart-header').fadeOut('slow', function(c){
 							$('.cart-header').remove();
 						});
 						});	  
-					});
+					}); -->
 			   </script>
-			<script>$(document).ready(function(c) {
-					$('.close2').on('click', function(c){
-						$('.cart-header1').fadeOut('slow', function(c){
-							$('.cart-header1').remove();
-						});
-						});	  
-					});
-			   </script>
-			   <script>$(document).ready(function(c) {
-					$('.close3').on('click', function(c){
-						$('.cart-header2').fadeOut('slow', function(c){
-							$('.cart-header2').remove();
-						});
-						});	  
-					});
-			   </script>
+		
+			
 				
 			<div class="in-check" >
 				<ul class="unit">
@@ -112,8 +98,17 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 		<div id="footer">
 
 		</div>
-		
-		<script src="js/cart.js"></script>
+
+
 		<script src="js/includes.js"></script>
+		<script>
+			const products = JSON.parse( localStorage.getItem('productsData') );
+			const cart = JSON.parse(localStorage.getItem('cart'));
+			calcCardCount();
+			doProductsAction(cart,products,'renderCart');
+		</script>		
+		
+
+
 	</body>
 	</html>

@@ -27,6 +27,7 @@ const header = `
                 <div class="cart box_1">
                     <a href="checkout.html">
                          <div class="total">
+                            <span>$</span>
                             <span class="simpleCart_total"></span></div>
                             <img src="images/cart-1.png" alt="" />
                     </a>
@@ -269,15 +270,23 @@ const footer = `
 document.querySelector('#header')?.insertAdjacentHTML('beforeend',header);
 document.querySelector('#footer')?.insertAdjacentHTML('beforeend',footer);
 
-let sum = localStorage.getItem('cartTotal') || '0';
-document.querySelector('.total .simpleCart_total').textContent = sum;
 
+(() => {
+    let sum = localStorage.getItem('cartTotal') || '0';
+    document.querySelector('.total .simpleCart_total').textContent = sum;
+})();
 
-const calcTotalCart = (cart, products, param) => {
+const calcCardCount = () => {
+    const cart = JSON.parse(localStorage.getItem('cart'));
+	document.querySelector('.ckeckout #cart-count').textContent = cart.length;
+}
+
+const doProductsAction = (cart, products, param) => {
    let sum = 0;
     for (const cartId of cart) {
         for (const product of products) {
            if (cartId == product.id) {
+            const id = product.id;
             const title = product.title;
             const img = product.img;
             const price = product.price;
@@ -286,7 +295,7 @@ const calcTotalCart = (cart, products, param) => {
             localStorage.setItem('cartTotal', sum);
             document.querySelector('.total .simpleCart_total').textContent = sum;
            } else if (param == 'renderCart') {
-            const productMarkup = `<ul class="cart-header">
+            const productMarkup = `<ul data-id=${id} class="cart-header">
             <div class="close1"> </div>
                 <li class="ring-in"><a href="single.html" ><img src="images/${img}" class="img-responsive" alt=""></a>
                 </li>
@@ -299,9 +308,40 @@ const calcTotalCart = (cart, products, param) => {
             document.querySelector('.cart-items .in-check')?.insertAdjacentHTML('beforeend', productMarkup);
            }
 
-
            }
         }
     }
 }
+
+
+const deleteItemFromLS = (id) => {
+    let cart = localStorage.getItem('cart');
+    if (cart) {
+        cart = JSON.parse(cart);
+        const delInd = cart.indexOf(id);
+        cart.splice(delInd,1);
+        localStorage.setItem('cart',JSON.stringify(cart));
+    }
+}
+
+
+document.querySelector('.cart-items')?.addEventListener('click', (e) => {
+    if (e.target.matches('.close1')) {
+        deleteItemFromLS(e.target.parentElement.dataset.id);
+
+       $(e.target).parent().fadeOut('slow', function(c){
+            $(e.target).parent().remove();
+        });
+
+        doProductsAction( 
+
+            // Ощибка пересчета суммы при удалении товара из корзины
+            JSON.parse(localStorage.getItem('cart')), 
+            JSON.parse(localStorage.getItem('productsData')), 
+            'calcSum');
+			//хреново пересчитывает количество 
+        calcCardCount();
+            
+    }
+})
 

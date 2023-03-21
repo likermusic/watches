@@ -110,10 +110,12 @@ const renderData = (data) => {
                 </div>   
                 
                 ${
-                    (elem.old_price != 0) &&
+                    (elem.old_price != 0) ?  
                     `<div class="srch">
                         <span>-${ Math.round(100 - elem.price * 100 / elem.old_price) }% </span>
-                    </div> `
+                    </div>` 
+                    :
+                    ``
                 }
                      
             </div>
@@ -153,7 +155,7 @@ document.querySelector('.product-top .product-one').addEventListener('click', (e
     if (e.target.matches('.item_add i')) {
         const id = e.target.closest('.product-left').dataset.id;
         addToLS(id);
-        calcTotalCart( 
+        doProductsAction( 
             JSON.parse(localStorage.getItem('cart')), 
             JSON.parse(localStorage.getItem('productsData')), 
             'calcSum');
