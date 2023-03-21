@@ -46,6 +46,8 @@ const getData = () => {
     return data;
 }
 
+let test = 'TEST';
+
 // 2. Данные получены. Распаковать данные
 const transformData = (data) => {
     const productsData = data[2].data;
@@ -139,6 +141,7 @@ const addToLS = (item) => {
 
 }
 
+
 const rowData = getData();
 const productsData = transformData(rowData);
 localStorage.setItem('productsData',JSON.stringify(productsData));
@@ -147,13 +150,13 @@ renderData(JSON.parse(localStorage.getItem('productsData')));
 
 document.querySelector('.product-top .product-one').addEventListener('click', (e) => {
     e.preventDefault();
-    //console.log(e.target.tagName); // == <i></i>  
-    // if (e.target.classList.contains('icon')) {
-    //     console.log(e.target);
-    // } 
     if (e.target.matches('.item_add i')) {
         const id = e.target.closest('.product-left').dataset.id;
         addToLS(id);
+        calcTotalCart( 
+            JSON.parse(localStorage.getItem('cart')), 
+            JSON.parse(localStorage.getItem('productsData')), 
+            'calcSum');
     } 
     // console.log(e.target);
     // console.log(123);

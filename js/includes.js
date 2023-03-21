@@ -268,3 +268,40 @@ const footer = `
 
 document.querySelector('#header')?.insertAdjacentHTML('beforeend',header);
 document.querySelector('#footer')?.insertAdjacentHTML('beforeend',footer);
+
+let sum = localStorage.getItem('cartTotal') || '0';
+document.querySelector('.total .simpleCart_total').textContent = sum;
+
+
+const calcTotalCart = (cart, products, param) => {
+   let sum = 0;
+    for (const cartId of cart) {
+        for (const product of products) {
+           if (cartId == product.id) {
+            const title = product.title;
+            const img = product.img;
+            const price = product.price;
+           if (param == 'calcSum') {
+            sum += +price;
+            localStorage.setItem('cartTotal', sum);
+            document.querySelector('.total .simpleCart_total').textContent = sum;
+           } else if (param == 'renderCart') {
+            const productMarkup = `<ul class="cart-header">
+            <div class="close1"> </div>
+                <li class="ring-in"><a href="single.html" ><img src="images/${img}" class="img-responsive" alt=""></a>
+                </li>
+                <li><span class="name">${title}</span></li>
+                <li><span class="cost">$ ${price}</span></li>
+                <li><span>Free</span>
+                <p>Delivered in 2-3 business days</p></li>
+            <div class="clearfix"> </div>
+            </ul>`;
+            document.querySelector('.cart-items .in-check')?.insertAdjacentHTML('beforeend', productMarkup);
+           }
+
+
+           }
+        }
+    }
+}
+
