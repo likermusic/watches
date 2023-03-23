@@ -282,8 +282,15 @@ const calcCardCount = () => {
 }
 
 const doProductsAction = (cart, products, param) => {
-   let sum = 0;
-    for (const cartId of cart) {
+   let sum = 0; 
+
+   if (cart.length == 0) {
+        localStorage.setItem('cartTotal', sum);
+        document.querySelector('.total .simpleCart_total').textContent = sum;
+   } else {
+
+
+     for (const cartId of cart) {
         for (const product of products) {
            if (cartId == product.id) {
             const id = product.id;
@@ -311,6 +318,9 @@ const doProductsAction = (cart, products, param) => {
            }
         }
     }
+  
+}
+   
 }
 
 
@@ -325,20 +335,23 @@ const deleteItemFromLS = (id) => {
 }
 
 
+let removedItemId;
 document.querySelector('.cart-items')?.addEventListener('click', (e) => {
-    if (e.target.matches('.close1')) {
-        deleteItemFromLS(e.target.parentElement.dataset.id);
+    if (e.target.matches('.close1') && removedItemId != e.target.parentElement.dataset.id) {
+        removedItemId = e.target.parentElement.dataset.id;
+
+        deleteItemFromLS(e.target.parentElement.dataset.id); 
 
        $(e.target).parent().fadeOut('slow', function(c){
             $(e.target).parent().remove();
         });
 
         doProductsAction( 
-
             // Ощибка пересчета суммы при удалении товара из корзины
             JSON.parse(localStorage.getItem('cart')), 
             JSON.parse(localStorage.getItem('productsData')), 
             'calcSum');
+        
 			//хреново пересчитывает количество 
         calcCardCount();
             
