@@ -23,15 +23,22 @@ const header = `
                     <div class="clearfix"></div>
                 </div>
             </div>
+
             <div class="col-md-6 top-header-left">
                 <div class="cart box_1">
+ 
+                    <!-- Button trigger modal -->
+                    <a data-toggle="modal" data-target="#myModal" href="" id="signin" style="color:#fff;margin-right:10px">Sign in</a>
+                    <a data-toggle="modal" data-target="#myModal" href="" id="signup" style="color:#fff;margin-right:10px">Sign up</a>
+
+                   
                     <a href="checkout.html">
                          <div class="total">
                             <span>$</span>
                             <span class="simpleCart_total"></span></div>
                             <img src="images/cart-1.png" alt="" />
                     </a>
-                    <p><a href="javascript:;" class="simpleCart_empty">Empty Cart</a></p>
+                    
                     <div class="clearfix"> </div>
                 </div>
             </div>
@@ -199,6 +206,31 @@ const header = `
         </div>
     </div>
 </div>
+
+
+<!-- Login Modal -->
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 `;
 
 const footer = `
@@ -335,10 +367,17 @@ const deleteItemFromLS = (id) => {
 }
 
 
-let removedItemId;
+// 1679591881252
+//1679591926366
+
+let oldDate;
 document.querySelector('.cart-items')?.addEventListener('click', (e) => {
-    if (e.target.matches('.close1') && removedItemId != e.target.parentElement.dataset.id) {
-        removedItemId = e.target.parentElement.dataset.id;
+    if (oldDate && (new Date().getTime() - oldDate <= 1000) ) {
+        return;
+    }
+    if (e.target.matches('.close1')) {
+        console.log(123);
+        oldDate = new Date().getTime();
 
         deleteItemFromLS(e.target.parentElement.dataset.id); 
 
