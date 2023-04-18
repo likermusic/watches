@@ -336,7 +336,8 @@ const calcCardCount = () => {
 	document.querySelector('.ckeckout #cart-count').textContent = cart.length;
 }
 
-const doProductsAction = (cart, products, param) => {
+const doProductsAction = (cart, products, param) => { // [1,6,7]
+    console.log(cart);
    let sum = 0; 
 
    if (cart.length == 0) {

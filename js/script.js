@@ -130,17 +130,29 @@ const renderData = (data) => {
 // 
 
 // Добавление в LS
-const addToLS = (id) => {
-
-    let dataFromLS = localStorage.getItem('cart'); // null || ''
+const addToLS = (productId) => {
+    //cart = ["6","5"]
+    let cartFromLS = localStorage.getItem('carts'); // null || ''
+    const userId = localStorage.getItem('authUser');
 
     let arr = [];
-    if (dataFromLS) {
-        arr = JSON.parse(dataFromLS);
+    if (cartFromLS) {
+        arr = JSON.parse(cartFromLS); // [ {idUser: 1, data: [3,4,5]}, {idUser: 2, data: [3,4,5]} ]
+        const objInd = arr.findIndex((obj) => {
+            return obj.userId == userId;
+        })
+        if (objInd != -1) {
+            arr[objInd].data.push(productId);
+        } else {
+            const obj = { userId, data: [productId] };
+            arr.push(obj);
+        }
+    } else {
+        const obj = { userId, data: [productId] };
+        arr.push(obj);
     }
-    arr.push(id);
-    localStorage.setItem('cart', JSON.stringify(arr));
 
+    localStorage.setItem('carts', JSON.stringify(arr));
 }
 
 
@@ -155,10 +167,13 @@ document.querySelector('.product-top .product-one').addEventListener('click', (e
     if (e.target.matches('.item_add i')) {
         const id = e.target.closest('.product-left').dataset.id;
         addToLS(id);
-        doProductsAction(
-            JSON.parse(localStorage.getItem('cart')),
-            JSON.parse(localStorage.getItem('productsData')),
-            'calcSum');
+
+        const arr = JSON.parse(localStorage.getItem('carts'));
+        const objInd = arr.findIndex((obj) => {
+            return obj.userId == localStorage.getItem('authUser');
+        })
+
+        doProductsAction(arr[objInd].data, JSON.parse(localStorage.getItem('productsData')), 'calcSum');
     }
     // console.log(e.target);
     // console.log(123);
