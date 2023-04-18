@@ -28,11 +28,11 @@ const header = `
                 <div class="cart box_1">
  
                     <!-- Button trigger modal -->
-                    <a data-toggle="modal" data-target="#myModal" href="" id="signin" style="color:#fff;margin-right:10px">Sign in</a>
-                    <a data-toggle="modal" data-target="#myModal" href="" id="signup" style="color:#fff;margin-right:10px">Sign up</a>
+                    <a data-toggle="modal" data-target="#signIn" href="" id="signin" style="color:#fff;margin-right:10px">Sign in</a>
+                    <a data-toggle="modal" data-target="#signUp" href="" id="signup" style="color:#fff;margin-right:10px">Sign up</a>
 
                    
-                    <a href="checkout.html">
+                    <a id="cart-box" style="display:none" href="checkout.html">
                          <div class="total">
                             <span>$</span>
                             <span class="simpleCart_total"></span></div>
@@ -208,30 +208,51 @@ const header = `
 </div>
 
 
-<!-- Login Modal -->
-
-
-
-<!-- Modal -->
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
+<!-- Sign in Modal -->
+<div class="modal fade" id="signIn" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog modal-sm" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+        <h4 class="modal-title" id="myModalLabel">Login</h4>
       </div>
       <div class="modal-body">
-        ...
+            <input type="email" class="form-control" style="margin-bottom:10px" placeholder="Input your email">
+            <input type="password" class="form-control" placeholder="Input your password">
+            <label class="auth-error"></label>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button id="login" type="button" class="btn btn-default">Log in</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Sign up Modal -->
+<div class="modal fade" id="signUp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Registration</h4>
+      </div>
+      <div class="modal-body">
+            <input type="email" class="form-control" style="margin-bottom:10px" placeholder="Input your email">
+            <label class="email-error"></label>
+            <input type="password" class="form-control" style="margin-bottom:10px" placeholder="Input your password">
+            <input id="password-confirm" type="password" class="form-control" placeholder="Confirm your password">
+            <label class="password-error"></label>
+      </div>
+      <div class="modal-footer">
+        <button  id="register" type="button" class="btn btn-default">Registrate</button>
+      </div>
+    </div>
+  </div>
+</div>
 `;
+
+
+
 
 const footer = `
 <!--information-starts-->
@@ -301,6 +322,8 @@ const footer = `
 
 document.querySelector('#header')?.insertAdjacentHTML('beforeend',header);
 document.querySelector('#footer')?.insertAdjacentHTML('beforeend',footer);
+// document.querySelector('#footer').insertAdjacentHTML('afterend','<script src="js/bootstrap.js"></script>');
+
 
 
 (() => {
@@ -370,13 +393,14 @@ const deleteItemFromLS = (id) => {
 // 1679591881252
 //1679591926366
 
+// Когда удаляем товар из корзины
 let oldDate;
 document.querySelector('.cart-items')?.addEventListener('click', (e) => {
     if (oldDate && (new Date().getTime() - oldDate <= 1000) ) {
         return;
     }
     if (e.target.matches('.close1')) {
-        console.log(123);
+        // console.log(123);
         oldDate = new Date().getTime();
 
         deleteItemFromLS(e.target.parentElement.dataset.id); 
@@ -386,14 +410,315 @@ document.querySelector('.cart-items')?.addEventListener('click', (e) => {
         });
 
         doProductsAction( 
-            // Ощибка пересчета суммы при удалении товара из корзины
+           
             JSON.parse(localStorage.getItem('cart')), 
             JSON.parse(localStorage.getItem('productsData')), 
             'calcSum');
         
-			//хреново пересчитывает количество 
-        calcCardCount();
+	
+            calcCardCount();
             
     }
 })
+
+
+const renderBtnsIfAuth = () => {
+    document.querySelector('#signin')?.remove();
+    document.querySelector('#signup')?.remove();
+    document.querySelector(".cart.box_1")?.insertAdjacentHTML('afterbegin', `<a href="" id="logout" style="color:#fff;margin-right:10px">Logout</a>`);
+    document.querySelector('#cart-box').style.display = 'inline-block';
+}
+
+
+const logout = () => {
+    localStorage.removeItem('authUser');
+    document.querySelector('#logout').remove();
+    document.querySelector(".cart.box_1")?.insertAdjacentHTML('afterbegin',`
+    <a data-toggle="modal" data-target="#signIn" href="" id="signin" style="color:#fff;margin-right:10px">Sign in</a>
+    <a data-toggle="modal" data-target="#signUp" href="" id="signup" style="color:#fff;margin-right:10px">Sign up</a> 
+    `);
+    document.querySelector('#cart-box').style.display = 'none';
+}
+
+document.querySelector('#login').addEventListener('click', () => {
+    const emailField = document.querySelector('#signIn input[type="email"]');
+    const passwordField = document.querySelector('#signIn input[type="password"]');
+
+    if (localStorage.getItem('users')) {
+        let usersArray = JSON.parse(localStorage.getItem('users'));
+
+        const user = usersArray.find((user) => {
+            return user.email == emailField.value && user.password == passwordField.value;
+        });
+        
+        // const email = 'user1@mail.ru'; 
+        // const password = '1Aa234';
+        //user1@gmail.com
+        //Qwe123
+
+        if (user) {
+            localStorage.setItem('authUser',user.id);
+            $('#signIn').modal('hide');
+
+            renderBtnsIfAuth();
+          
+            document.querySelector('#logout').addEventListener('click', (e) => {
+                e.preventDefault();     
+                logout();
+            });
+
+        } else {
+            label = `<label id="authError" style="color: red;font-style:italic;font-size:12px">Check email and password</label>`;
+            document.querySelector('#signIn .auth-error').innerHTML = label;
+        }
+
+        
+    }
+
+})
+
+
+document.querySelector('#register').addEventListener('click', () => {
+    const emailField = document.querySelector('#signUp input[type="email"]');
+    const passwordField = document.querySelector('#signUp input[type="password"]');
+    const passwordConfirmField = document.querySelector('#password-confirm');
+
+    let label; 
+    const isMatchEmail = emailField.value.match(/^\S+@\S+\.\S+$/);
+    const isMatchPassword = passwordField.value.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/);
+
+    if (!isMatchEmail) {
+        emailField.style.border = '1px solid red';
+        label = `<label id="errorEmailLabel" style="color: red;font-style:italic;font-size:12px">Check email correctness</label>`;
+        document.querySelector('#signUp .email-error').innerHTML = label;
+    } else {
+        emailField.style.borderColor = '#ccc';
+        document.querySelector('#errorEmailLabel')?.remove();
+    }
+
+    if (!isMatchPassword || !passwordConfirmField.value || passwordField.value !== passwordConfirmField.value) {
+        passwordField.style.border = '1px solid red';
+        passwordConfirmField.style.border = '1px solid red';
+        label = `<label id="errorPasswordLabel" style="color: red;font-style:italic;font-size:12px">Check password correctness</label>`;
+        document.querySelector('#signUp .password-error').innerHTML = label;
+    }  else {
+        passwordField.style.borderColor = '#ccc';
+        document.querySelector('#errorPasswordLabel')?.remove();
+        // document.querySelector('#signIn').modal('hide');     
+    }
+
+    if (isMatchEmail && isMatchPassword && passwordField.value == passwordConfirmField.value) {
+        if ( localStorage.getItem('users') && JSON.parse(localStorage.getItem('users')).length > 0 ) {
+            let users = JSON.parse(localStorage.getItem('users'));
+            
+            const isUser = users.find((item)=>{
+                return item.email == emailField.value;
+            })
+
+            if (!isUser) {
+                const id = +users[users.length-1].id + 1;
+                const user = {
+                    id,
+                    email: emailField.value,
+                    password: passwordField.value,
+                };
+                users.push(user);
+                localStorage.setItem('users', JSON.stringify(users));
+                localStorage.setItem('authUser',id);
+                $('#signUp').modal('hide');
+                emailField.value = '';
+                passwordField.value = '';
+                renderBtnsIfAuth();
+                document.querySelector('#logout').addEventListener('click', (e) => {
+                    e.preventDefault();     
+                    logout();
+                });
+            } else {
+                alert('Email is not unique');
+            }
+            
+        } else {
+            const users = [];
+            const user = {
+                id:1,
+                email: emailField.value,
+                password: passwordField.value,
+            };
+            users.push(user);
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('authUser',"1");
+            $('#signUp').modal('hide');
+            emailField.value = '';
+            passwordField.value = '';
+            renderBtnsIfAuth();
+            document.querySelector('#logout').addEventListener('click', (e) => {
+                e.preventDefault();     
+                logout();
+            });
+        }
+
+    // 123321Ru
+    //d@m.ry
+
+
+
+    }
+
+})
+
+
+document.addEventListener('DOMContentLoaded', () => {
+   
+    if (localStorage.getItem('authUser')) {
+        const userId = localStorage.getItem('authUser');
+        renderBtnsIfAuth();
+    }
+
+    document.querySelector('#logout')?.addEventListener('click', (e) => {
+        e.preventDefault();     
+        logout();
+    });
+})
+
+
+/*
+   
+
+
+  
+*/
+
+
+
+// localStorage.setItem('users',JSON.stringify([
+//     {email: 'user1@mail.ru', password: '1Aa234'},
+//     {email: 'user2@mail.ru', password: '5Aa67'},
+// ]));
+
+
+// var arr = [1, -1, 2, -2, 3];
+
+// var positiveArr = arr.filter(function(number) {
+//     if (number > 0) {
+//         return number;
+//     }
+// //   return number > 0;
+// });
+
+// console.log( positiveArr ); // 1,2,3
+
+// var arr = [1,2,3,4,5,6,7];
+// //newArr = [2,4,6]
+
+// var newArr = arr.filter(function(elem) {
+//     // if (elem%2 == 0) {
+//         return elem%2 == 0;
+//     // }
+// })
+// console.log(newArr);
+
+// var arr = ['bbc', 'bmw', 'js'];
+
+// var newArr = arr.map(function(elem,i){
+//     if (i%2 != 0) {
+//         return elem.toUpperCase();
+//     } else {
+//         return elem;
+//     }
+// })
+
+// console.log(newArr);
+
+
+
+// var arr = [{id:1,name:'dfdf'},2,3,4,5,6,7];
+
+// var allPositive = arr.some(function(elem) {
+//     return elem > 0;
+// })
+
+// var allPositive = arr.every(function(elem) {
+//     return elem > 0;
+// })
+// console.log(allPositive);
+
+// var id = 2;
+
+// var isFound = arr.find(function(elem) {
+//     if (elem.id == id) {
+//         return elem;
+//     }
+//     // return elem.id == id;
+// })
+// console.log(isFound);
+
+
+// var arr  = [16,2,1,2,15,-1,6,8,5,9];
+// var newArr = [];
+// var min = arr[0]; //16
+
+// for (let i = 0; i < arr.length; i++) {
+
+//    for (let j = 0; j < arr.length; j++) {
+//      if (arr[j]<arr[i]) {
+//         min = arr[j];
+//     }  
+// }
+// arr.pop(min);
+//    newArr.push(min);
+// }
+
+// console.log(newArr);
+
+// function t(a, b) {
+//     if (a > b) return 1;
+//     if (a == b) return 0;
+//     if (a < b) return -1;
+//   }
+  
+//   let arr = [16,2,1,2,15,-1,6,8,5,9];
+  
+//   arr.sort(t);
+  
+//   console.log(arr);  // 1, 2, 15
+
+
+
+
+
+
+// arr.sort();
+// console.log(arr);
+
+
+
+
+// let arr2 = [-10,-11,-12];
+// let arr1 = [16,2,1,2,15,-1,6,8,5,9,...arr2];
+
+// let arr3 = arr1.concat(arr2);
+
+// console.log(arr3);
+
+// let arr3 = [...arr1,...arr2]; // spread
+// console.log(arr1);
+
+// let name = arr[0];
+// let gender = arr[1];
+// let age = arr[2];
+// let [name,gender,age] = ['John','man',32];
+// let arr = ['John','man',32];
+// let [name,gender,age] = arr;
+// console.log(name,gender,age,arr);
+
+// первый и второй элементы не нужны
+// let [, , a] = ["Юлий", "Цезарь", "Император", "Рима"];
+// console.log(a);
+
+// let [firstName, lastName, ...rest] = ["Юлий", "Цезарь", "Император", "Рима","!"];
+
+// console.log(firstName, lastName, rest);
+
+
+
 
