@@ -169,11 +169,12 @@ document.querySelector('.product-top .product-one').addEventListener('click', (e
         addToLS(id);
 
         const arr = JSON.parse(localStorage.getItem('carts'));
+        const userId = localStorage.getItem('authUser');
         const objInd = arr.findIndex((obj) => {
-            return obj.userId == localStorage.getItem('authUser');
+            return obj.userId == userId;
         })
 
-        doProductsAction(arr[objInd].data, JSON.parse(localStorage.getItem('productsData')), 'calcSum');
+        doProductsAction(userId, arr[objInd].data, JSON.parse(localStorage.getItem('productsData')), 'calcSum');
     }
     // console.log(e.target);
     // console.log(123);

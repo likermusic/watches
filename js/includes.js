@@ -331,21 +331,22 @@ document.querySelector('#footer')?.insertAdjacentHTML('beforeend',footer);
     document.querySelector('.total .simpleCart_total').textContent = sum;
 })();
 
-const calcCardCount = () => {
-    const cart = JSON.parse(localStorage.getItem('cart'));
-	document.querySelector('.ckeckout #cart-count').textContent = cart.length;
+const calcCardCount = (data) => {
+	document.querySelector('.ckeckout #cart-count').textContent = data.length;
 }
 
-const doProductsAction = (cart, products, param) => { // [1,6,7]
-    console.log(cart);
+const doProductsAction = (userId, cart, products, param) => { // [1,6,7]
+    // console.log(cart);
    let sum = 0; 
 
    if (cart.length == 0) {
-        localStorage.setItem('cartTotal', sum);
-        document.querySelector('.total .simpleCart_total').textContent = sum;
+        if (localStorage.getItem('cartTotal')) {
+            const cartTotal = JSON.parse(localStorage.getItem('cartTotal'));
+            cartTotal.push({userId, total: sum});
+            localStorage.setItem('cartTotal', cartTotal);
+            document.querySelector('.total .simpleCart_total').textContent = sum;
+        }
    } else {
-
-
      for (const cartId of cart) {
         for (const product of products) {
            if (cartId == product.id) {
@@ -355,7 +356,21 @@ const doProductsAction = (cart, products, param) => { // [1,6,7]
             const price = product.price;
            if (param == 'calcSum') {
             sum += +price;
-            localStorage.setItem('cartTotal', sum);
+            const cartTotal = JSON.parse(localStorage.getItem('cartTotal'));
+            const objInd = cartTotal.findIndex((obj) => {
+                return obj.userId == userId;
+            })
+            cartTotal[objInd].total = sum;
+            localStorage.setItem('cartTotal', JSON.stringify(cartTotal));//
+            //cartTotal = [
+            //     {userId:1, total: 500},
+            //     {userId:2, total: 0},
+
+            //     {userId:3, total: 500},
+
+            //     {userId:4, total: 500},
+
+            // ]
             document.querySelector('.total .simpleCart_total').textContent = sum;
            } else if (param == 'renderCart') {
             const productMarkup = `<ul data-id=${id} class="cart-header">
@@ -380,13 +395,19 @@ const doProductsAction = (cart, products, param) => { // [1,6,7]
 }
 
 
-const deleteItemFromLS = (id) => {
-    let cart = localStorage.getItem('cart');
-    if (cart) {
-        cart = JSON.parse(cart);
-        const delInd = cart.indexOf(id);
-        cart.splice(delInd,1);
-        localStorage.setItem('cart',JSON.stringify(cart));
+const deleteItemFromLS = (productId, userId) => {
+    if (localStorage.getItem('carts')) {
+        const arr = JSON.parse(localStorage.getItem('carts'));
+        const objInd = arr.findIndex((obj) => {
+            return obj.userId == userId;
+        })
+        const cart = arr[objInd].data;
+        if (cart) {
+            const delInd = cart.indexOf(productId);
+            cart.splice(delInd,1);
+            arr[objInd].data = cart;
+            localStorage.setItem('carts',JSON.stringify(arr));
+        }
     }
 }
 
@@ -403,15 +424,17 @@ document.querySelector('.cart-items')?.addEventListener('click', (e) => {
     if (e.target.matches('.close1')) {
         // console.log(123);
         oldDate = new Date().getTime();
-
-        deleteItemFromLS(e.target.parentElement.dataset.id); 
+        const userId = localStorage.getItem('authUser');
+        deleteItemFromLS(e.target.parentElement.dataset.id, userId); 
 
        $(e.target).parent().fadeOut('slow', function(c){
             $(e.target).parent().remove();
         });
 
+       
+
         doProductsAction( 
-           
+            userId,
             JSON.parse(localStorage.getItem('cart')), 
             JSON.parse(localStorage.getItem('productsData')), 
             'calcSum');
