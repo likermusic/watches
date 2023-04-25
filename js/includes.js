@@ -320,8 +320,8 @@ const footer = `
 <!--footer-end-->
 `;
 
-document.querySelector('#header')?.insertAdjacentHTML('beforeend',header);
-document.querySelector('#footer')?.insertAdjacentHTML('beforeend',footer);
+document.querySelector('#header')?.insertAdjacentHTML('beforeend', header);
+document.querySelector('#footer')?.insertAdjacentHTML('beforeend', footer);
 // document.querySelector('#footer').insertAdjacentHTML('afterend','<script src="js/bootstrap.js"></script>');
 
 
@@ -332,48 +332,59 @@ document.querySelector('#footer')?.insertAdjacentHTML('beforeend',footer);
 })();
 
 const calcCardCount = (data) => {
-	document.querySelector('.ckeckout #cart-count').textContent = data.length;
+    // console.log(data);
+    document.querySelector('.ckeckout #cart-count').textContent = data.length;
 }
 
 const doProductsAction = (userId, cart, products, param) => { // [1,6,7]
-    // console.log(cart);
-   let sum = 0; 
+    let sum = 0;
 
-   if (cart.length == 0) {
-        if (localStorage.getItem('cartTotal')) {
-            const cartTotal = JSON.parse(localStorage.getItem('cartTotal'));
-            cartTotal.push({userId, total: sum});
-            localStorage.setItem('cartTotal', cartTotal);
+    if (cart.length == 0) {
+        if (localStorage.getItem('cartsTotal')) {
+            let cartsTotal = JSON.parse(localStorage.getItem('cartsTotal'));
+            cartsTotal.push({ userId, total: sum });
+            localStorage.setItem('cartsTotal', cartsTotal);
             document.querySelector('.total .simpleCart_total').textContent = sum;
         }
-   } else {
-     for (const cartId of cart) {
-        for (const product of products) {
-           if (cartId == product.id) {
-            const id = product.id;
-            const title = product.title;
-            const img = product.img;
-            const price = product.price;
-           if (param == 'calcSum') {
-            sum += +price;
-            const cartTotal = JSON.parse(localStorage.getItem('cartTotal'));
-            const objInd = cartTotal.findIndex((obj) => {
-                return obj.userId == userId;
-            })
-            cartTotal[objInd].total = sum;
-            localStorage.setItem('cartTotal', JSON.stringify(cartTotal));//
-            //cartTotal = [
-            //     {userId:1, total: 500},
-            //     {userId:2, total: 0},
+    } else {
+        for (const cartId of cart) {
+            for (const product of products) {
+                if (cartId == product.id) {
+                    const id = product.id;
+                    const title = product.title;
+                    const img = product.img;
+                    const price = product.price;
+                    if (param == 'calcSum') {
+                        sum += +price;
 
-            //     {userId:3, total: 500},
+                        let cartsTotal = JSON.parse(localStorage.getItem('cartsTotal')) || [];
+                        if (cartsTotal.length > 0) {
+                            const objInd = cartsTotal.findIndex((obj) => {
+                                return obj.userId == userId;
+                            })
 
-            //     {userId:4, total: 500},
+                            if (objInd != undefined) {
+                                cartsTotal[objInd].total = sum;
+                            } else {
+                                cartsTotal.push({ userId, total: sum });
+                            }
+                        } else {
+                            cartsTotal.push({ userId, total: sum });
+                        }
+                        console.log('cartsTotal', cartsTotal);
+                        localStorage.setItem('cartsTotal', JSON.stringify(cartsTotal));//
+                        //cartsTotal = [
+                        //     {userId:1, total: 500},
+                        //     {userId:2, total: 0},
 
-            // ]
-            document.querySelector('.total .simpleCart_total').textContent = sum;
-           } else if (param == 'renderCart') {
-            const productMarkup = `<ul data-id=${id} class="cart-header">
+                        //     {userId:3, total: 500},
+
+                        //     {userId:4, total: 500},
+
+                        // ]
+                        document.querySelector('.total .simpleCart_total').textContent = sum;
+                    } else if (param == 'renderCart') {
+                        const productMarkup = `<ul data-id=${id} class="cart-header">
             <div class="close1"> </div>
                 <li class="ring-in"><a href="single.html" ><img src="images/${img}" class="img-responsive" alt=""></a>
                 </li>
@@ -383,19 +394,21 @@ const doProductsAction = (userId, cart, products, param) => { // [1,6,7]
                 <p>Delivered in 2-3 business days</p></li>
             <div class="clearfix"> </div>
             </ul>`;
-            document.querySelector('.cart-items .in-check')?.insertAdjacentHTML('beforeend', productMarkup);
-           }
+                        document.querySelector('.cart-items .in-check')?.insertAdjacentHTML('beforeend', productMarkup);
+                    }
 
-           }
+                }
+            }
         }
+
     }
-  
-}
-   
+
 }
 
 
 const deleteItemFromLS = (productId, userId) => {
+
+    // Когда удаляем последний товар пользователя то CartsTotal = [object Object],[object Object]
     if (localStorage.getItem('carts')) {
         const arr = JSON.parse(localStorage.getItem('carts'));
         const objInd = arr.findIndex((obj) => {
@@ -404,9 +417,9 @@ const deleteItemFromLS = (productId, userId) => {
         const cart = arr[objInd].data;
         if (cart) {
             const delInd = cart.indexOf(productId);
-            cart.splice(delInd,1);
+            cart.splice(delInd, 1);
             arr[objInd].data = cart;
-            localStorage.setItem('carts',JSON.stringify(arr));
+            localStorage.setItem('carts', JSON.stringify(arr));
         }
     }
 }
@@ -418,30 +431,37 @@ const deleteItemFromLS = (productId, userId) => {
 // Когда удаляем товар из корзины
 let oldDate;
 document.querySelector('.cart-items')?.addEventListener('click', (e) => {
-    if (oldDate && (new Date().getTime() - oldDate <= 1000) ) {
+    if (oldDate && (new Date().getTime() - oldDate <= 1000)) {
         return;
     }
     if (e.target.matches('.close1')) {
         // console.log(123);
         oldDate = new Date().getTime();
         const userId = localStorage.getItem('authUser');
-        deleteItemFromLS(e.target.parentElement.dataset.id, userId); 
 
-       $(e.target).parent().fadeOut('slow', function(c){
+        // Когда удаляем последний товар пользователя то CartsTotal = [object Object],[object Object]
+
+        deleteItemFromLS(e.target.parentElement.dataset.id, userId);
+
+        $(e.target).parent().fadeOut('slow', function (c) {
             $(e.target).parent().remove();
         });
 
-       
-
-        doProductsAction( 
+        const arr = JSON.parse(localStorage.getItem('carts'));
+        const objInd = arr.findIndex((obj) => {
+            return obj.userId == userId;
+        })
+        const cart = arr[objInd].data;
+        // console.log(cart);
+        // НУЖНО ФИКСИТЬ
+        doProductsAction(
             userId,
-            JSON.parse(localStorage.getItem('cart')), 
-            JSON.parse(localStorage.getItem('productsData')), 
+            cart,
+            JSON.parse(localStorage.getItem('productsData')),
             'calcSum');
-        
-	
-            calcCardCount();
-            
+
+        calcCardCount(cart);
+
     }
 })
 
@@ -457,7 +477,7 @@ const renderBtnsIfAuth = () => {
 const logout = () => {
     localStorage.removeItem('authUser');
     document.querySelector('#logout').remove();
-    document.querySelector(".cart.box_1")?.insertAdjacentHTML('afterbegin',`
+    document.querySelector(".cart.box_1")?.insertAdjacentHTML('afterbegin', `
     <a data-toggle="modal" data-target="#signIn" href="" id="signin" style="color:#fff;margin-right:10px">Sign in</a>
     <a data-toggle="modal" data-target="#signUp" href="" id="signup" style="color:#fff;margin-right:10px">Sign up</a> 
     `);
@@ -474,20 +494,20 @@ document.querySelector('#login').addEventListener('click', () => {
         const user = usersArray.find((user) => {
             return user.email == emailField.value && user.password == passwordField.value;
         });
-        
+
         // const email = 'user1@mail.ru'; 
         // const password = '1Aa234';
         //user1@gmail.com
         //Qwe123
 
         if (user) {
-            localStorage.setItem('authUser',user.id);
+            localStorage.setItem('authUser', user.id);
             $('#signIn').modal('hide');
 
             renderBtnsIfAuth();
-          
+
             document.querySelector('#logout').addEventListener('click', (e) => {
-                e.preventDefault();     
+                e.preventDefault();
                 logout();
             });
 
@@ -496,7 +516,7 @@ document.querySelector('#login').addEventListener('click', () => {
             document.querySelector('#signIn .auth-error').innerHTML = label;
         }
 
-        
+
     }
 
 })
@@ -507,7 +527,7 @@ document.querySelector('#register').addEventListener('click', () => {
     const passwordField = document.querySelector('#signUp input[type="password"]');
     const passwordConfirmField = document.querySelector('#password-confirm');
 
-    let label; 
+    let label;
     const isMatchEmail = emailField.value.match(/^\S+@\S+\.\S+$/);
     const isMatchPassword = passwordField.value.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/);
 
@@ -525,22 +545,22 @@ document.querySelector('#register').addEventListener('click', () => {
         passwordConfirmField.style.border = '1px solid red';
         label = `<label id="errorPasswordLabel" style="color: red;font-style:italic;font-size:12px">Check password correctness</label>`;
         document.querySelector('#signUp .password-error').innerHTML = label;
-    }  else {
+    } else {
         passwordField.style.borderColor = '#ccc';
         document.querySelector('#errorPasswordLabel')?.remove();
         // document.querySelector('#signIn').modal('hide');     
     }
 
     if (isMatchEmail && isMatchPassword && passwordField.value == passwordConfirmField.value) {
-        if ( localStorage.getItem('users') && JSON.parse(localStorage.getItem('users')).length > 0 ) {
+        if (localStorage.getItem('users') && JSON.parse(localStorage.getItem('users')).length > 0) {
             let users = JSON.parse(localStorage.getItem('users'));
-            
-            const isUser = users.find((item)=>{
+
+            const isUser = users.find((item) => {
                 return item.email == emailField.value;
             })
 
             if (!isUser) {
-                const id = +users[users.length-1].id + 1;
+                const id = +users[users.length - 1].id + 1;
                 const user = {
                     id,
                     email: emailField.value,
@@ -548,41 +568,41 @@ document.querySelector('#register').addEventListener('click', () => {
                 };
                 users.push(user);
                 localStorage.setItem('users', JSON.stringify(users));
-                localStorage.setItem('authUser',id);
+                localStorage.setItem('authUser', id);
                 $('#signUp').modal('hide');
                 emailField.value = '';
                 passwordField.value = '';
                 renderBtnsIfAuth();
                 document.querySelector('#logout').addEventListener('click', (e) => {
-                    e.preventDefault();     
+                    e.preventDefault();
                     logout();
                 });
             } else {
                 alert('Email is not unique');
             }
-            
+
         } else {
             const users = [];
             const user = {
-                id:1,
+                id: 1,
                 email: emailField.value,
                 password: passwordField.value,
             };
             users.push(user);
             localStorage.setItem('users', JSON.stringify(users));
-            localStorage.setItem('authUser',"1");
+            localStorage.setItem('authUser', "1");
             $('#signUp').modal('hide');
             emailField.value = '';
             passwordField.value = '';
             renderBtnsIfAuth();
             document.querySelector('#logout').addEventListener('click', (e) => {
-                e.preventDefault();     
+                e.preventDefault();
                 logout();
             });
         }
 
-    // 123321Ru
-    //d@m.ry
+        // 123321Ru
+        //d@m.ry
 
 
 
@@ -592,24 +612,24 @@ document.querySelector('#register').addEventListener('click', () => {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-   
+
     if (localStorage.getItem('authUser')) {
         const userId = localStorage.getItem('authUser');
         renderBtnsIfAuth();
     }
 
     document.querySelector('#logout')?.addEventListener('click', (e) => {
-        e.preventDefault();     
+        e.preventDefault();
         logout();
     });
 })
 
 
 /*
-   
 
 
-  
+
+
 */
 
 
@@ -686,7 +706,7 @@ document.addEventListener('DOMContentLoaded', () => {
 //    for (let j = 0; j < arr.length; j++) {
 //      if (arr[j]<arr[i]) {
 //         min = arr[j];
-//     }  
+//     }
 // }
 // arr.pop(min);
 //    newArr.push(min);
@@ -699,11 +719,11 @@ document.addEventListener('DOMContentLoaded', () => {
 //     if (a == b) return 0;
 //     if (a < b) return -1;
 //   }
-  
+
 //   let arr = [16,2,1,2,15,-1,6,8,5,9];
-  
+
 //   arr.sort(t);
-  
+
 //   console.log(arr);  // 1, 2, 15
 
 
@@ -742,6 +762,9 @@ document.addEventListener('DOMContentLoaded', () => {
 // let [firstName, lastName, ...rest] = ["Юлий", "Цезарь", "Император", "Рима","!"];
 
 // console.log(firstName, lastName, rest);
+
+
+
 
 
 

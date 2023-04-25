@@ -130,10 +130,9 @@ const renderData = (data) => {
 // 
 
 // Добавление в LS
-const addToLS = (productId) => {
+const addToLS = (productId, userId) => {
     //cart = ["6","5"]
     let cartFromLS = localStorage.getItem('carts'); // null || ''
-    const userId = localStorage.getItem('authUser');
 
     let arr = [];
     if (cartFromLS) {
@@ -165,11 +164,21 @@ renderData(JSON.parse(localStorage.getItem('productsData')));
 document.querySelector('.product-top .product-one').addEventListener('click', (e) => {
     e.preventDefault();
     if (e.target.matches('.item_add i')) {
-        const id = e.target.closest('.product-left').dataset.id;
-        addToLS(id);
+        const productId = e.target.closest('.product-left').dataset.id;
 
-        const arr = JSON.parse(localStorage.getItem('carts'));
         const userId = localStorage.getItem('authUser');
+        addToLS(productId, userId);
+        // if (arr.length > 0) {
+        //     const objInd = arr.findIndex((obj) => {
+        //         return obj.userId == userId;
+        //     })
+        //     if (objInd) {
+        //         addToLS(productId, userId);
+        //     }
+        // } else {
+        //     addToLS(productId, userId);
+        // }
+        const arr = JSON.parse(localStorage.getItem('carts'));
         const objInd = arr.findIndex((obj) => {
             return obj.userId == userId;
         })
