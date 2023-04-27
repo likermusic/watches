@@ -327,7 +327,18 @@ document.querySelector('#footer')?.insertAdjacentHTML('beforeend', footer);
 
 
 (() => {
-    let sum = localStorage.getItem('cartTotal') || '0';
+    let cartsTotal = JSON.parse(localStorage.getItem('cartsTotal')) || 0;
+    const userId = localStorage.getItem('authUser');
+    let sum;
+    if (cartsTotal) {
+        const objInd = cartsTotal.findIndex((obj) => {
+            return obj.userId == userId;
+        })
+        sum = cartsTotal[objInd].total;
+    } else {
+        sum = String(cartsTotal);
+    }
+
     document.querySelector('.total .simpleCart_total').textContent = sum;
 })();
 
@@ -336,14 +347,21 @@ const calcCardCount = (data) => {
     document.querySelector('.ckeckout #cart-count').textContent = data.length;
 }
 
-const doProductsAction = (userId, cart, products, param) => { // [1,6,7]
+const doProductsAction = (userId, cart, products, param, action) => { // [1,6,7]
     let sum = 0;
 
     if (cart.length == 0) {
-        if (localStorage.getItem('cartsTotal')) {
+        if (localStorage.getItem('cartsTotal') && param == 'calcSum') {
             let cartsTotal = JSON.parse(localStorage.getItem('cartsTotal'));
-            cartsTotal.push({ userId, total: sum });
-            localStorage.setItem('cartsTotal', cartsTotal);
+            if (action == 'deleteProduct') {
+                const objInd = cartsTotal.findIndex((obj) => {
+                    return obj.userId == userId;
+                })
+                cartsTotal[objInd].total = sum;
+            } else {
+                cartsTotal.push({ userId, total: sum });
+            }
+            localStorage.setItem('cartsTotal', JSON.stringify(cartsTotal));
             document.querySelector('.total .simpleCart_total').textContent = sum;
         }
     } else {
@@ -458,7 +476,7 @@ document.querySelector('.cart-items')?.addEventListener('click', (e) => {
             userId,
             cart,
             JSON.parse(localStorage.getItem('productsData')),
-            'calcSum');
+            'calcSum', 'deleteProduct');
 
         calcCardCount(cart);
 
