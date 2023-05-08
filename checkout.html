@@ -107,13 +107,17 @@ Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, Sony
 	<script>
 		const userId = localStorage.getItem('authUser');
 		const products = JSON.parse(localStorage.getItem('productsData'));
-		const arr = JSON.parse(localStorage.getItem('carts'));
-		const objInd = arr.findIndex((obj) => {
-			return obj.userId == userId;
-		})
-		const cart = arr[objInd].data;
-		calcCardCount(cart);
-		doProductsAction(userId, cart, products, 'renderCart');
+		const arr = JSON.parse(localStorage.getItem('carts')) || [];
+		if (arr.length > 0) {
+			const objInd = arr.findIndex((obj) => {
+				return obj.userId == userId;
+			})
+			if (objInd != -1) {
+				const cart = arr[objInd].data;
+				calcCardCount(cart);
+				doProductsAction(userId, cart, products, 'renderCart');
+			}
+		}
 	</script>
 
 

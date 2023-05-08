@@ -325,8 +325,7 @@ document.querySelector('#footer')?.insertAdjacentHTML('beforeend', footer);
 // document.querySelector('#footer').insertAdjacentHTML('afterend','<script src="js/bootstrap.js"></script>');
 
 
-
-(() => {
+const initialTotal = () => {
     let cartsTotal = JSON.parse(localStorage.getItem('cartsTotal')) || 0;
     const userId = localStorage.getItem('authUser');
     let sum;
@@ -334,13 +333,20 @@ document.querySelector('#footer')?.insertAdjacentHTML('beforeend', footer);
         const objInd = cartsTotal.findIndex((obj) => {
             return obj.userId == userId;
         })
-        sum = cartsTotal[objInd].total;
+
+        if (objInd != -1) {
+            sum = cartsTotal[objInd].total;
+        } else {
+            sum = '0';
+        }
     } else {
         sum = String(cartsTotal);
     }
 
     document.querySelector('.total .simpleCart_total').textContent = sum;
-})();
+}
+
+initialTotal();
 
 const calcCardCount = (data) => {
     // console.log(data);
@@ -381,7 +387,7 @@ const doProductsAction = (userId, cart, products, param, action) => { // [1,6,7]
                                 return obj.userId == userId;
                             })
 
-                            if (objInd != undefined) {
+                            if (objInd != -1) {
                                 cartsTotal[objInd].total = sum;
                             } else {
                                 cartsTotal.push({ userId, total: sum });
@@ -389,7 +395,7 @@ const doProductsAction = (userId, cart, products, param, action) => { // [1,6,7]
                         } else {
                             cartsTotal.push({ userId, total: sum });
                         }
-                        console.log('cartsTotal', cartsTotal);
+                        // console.log('cartsTotal', cartsTotal);
                         localStorage.setItem('cartsTotal', JSON.stringify(cartsTotal));//
                         //cartsTotal = [
                         //     {userId:1, total: 500},
@@ -523,7 +529,7 @@ document.querySelector('#login').addEventListener('click', () => {
             $('#signIn').modal('hide');
 
             renderBtnsIfAuth();
-
+            initialTotal();
             document.querySelector('#logout').addEventListener('click', (e) => {
                 e.preventDefault();
                 logout();
@@ -591,6 +597,7 @@ document.querySelector('#register').addEventListener('click', () => {
                 emailField.value = '';
                 passwordField.value = '';
                 renderBtnsIfAuth();
+                initialTotal();
                 document.querySelector('#logout').addEventListener('click', (e) => {
                     e.preventDefault();
                     logout();
@@ -613,6 +620,7 @@ document.querySelector('#register').addEventListener('click', () => {
             emailField.value = '';
             passwordField.value = '';
             renderBtnsIfAuth();
+            initialTotal();
             document.querySelector('#logout').addEventListener('click', (e) => {
                 e.preventDefault();
                 logout();
