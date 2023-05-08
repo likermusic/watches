@@ -511,7 +511,7 @@ const logout = () => {
 document.querySelector('#login').addEventListener('click', () => {
     const emailField = document.querySelector('#signIn input[type="email"]');
     const passwordField = document.querySelector('#signIn input[type="password"]');
-
+    let label;
     if (localStorage.getItem('users')) {
         let usersArray = JSON.parse(localStorage.getItem('users'));
 
@@ -541,6 +541,9 @@ document.querySelector('#login').addEventListener('click', () => {
         }
 
 
+    } else {
+        label = `<label id="authError" style="color: red;font-style:italic;font-size:12px">Check email and password</label>`;
+        document.querySelector('#signIn .auth-error').innerHTML = label;
     }
 
 })
@@ -647,10 +650,18 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('#logout')?.addEventListener('click', (e) => {
         e.preventDefault();
         logout();
+        window.location.replace('index.html');
     });
 })
 
 
+// Для очистки модал от ошибок после его закрытия чтобы не появлялись снова при открытии
+$('.modal').on('hidden.bs.modal', function () {
+    $(this).find("input,textarea,select").val('').end();
+    $(this).find("input,textarea,select").css('border-color', '');
+    $('label').text('');
+    $(this).data('modal', null);
+})
 /*
 
 
